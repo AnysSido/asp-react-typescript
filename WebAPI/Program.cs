@@ -18,6 +18,8 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseSpaStaticFiles(new StaticFileOptions { RequestPath = "/clientapp/build" });
+
 app.UseAuthorization();
 
 app.MapControllers();
