@@ -7,6 +7,9 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// Add static files from spa directory
+builder.Services.AddSpaStaticFiles(options => options.RootPath = "clientapp/build");
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -18,10 +21,25 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.UseSpaStaticFiles(new StaticFileOptions { RequestPath = "/clientapp/build" });
+// Serve static files from the spa directory instead of wwwroot
+app.UseSpaStaticFiles();
 
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.MapWhen(x => !x.Request.Path.StartsWithSegments("/api"), appBuilder =>
+{
+    appBuilder.UseSpa(spa =>
+    {
+        if (app.Environment.IsDevelopment())
+        {
+            spa.UseProxyToSpaDevelopmentServer("http://127.0.0.1:3000");
+        }
+
+        // Rewrite all requests to the spa
+        spa.Options.SourcePath = "clientapp";
+    });
+});
 
 app.Run();
